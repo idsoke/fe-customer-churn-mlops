@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://customer-churn-mlops.onrender.com',
+  apiBaseUrl: 'https://customer-churn-mlops.fastapicloud.dev',
 };
