@@ -1,12 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { Predictor } from './features/predictor/predictor';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [Predictor],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
-export class App {
-  protected readonly title = signal('fe-customer-churn-mlops');
-}
+export class App {}

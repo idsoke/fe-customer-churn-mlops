@@ -1,0 +1,221 @@
+<header>
+  <div class="container header-inner">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18" />
+          <path d="M7 15l4-5 3 3 5-7" />
+        </svg>
+      </div>
+      <div>
+        <h1>Customer Churn Predictor</h1>
+        <p>Prediksi risiko pelanggan berhenti berlangganan</p>
+      </div>
+    </div>
+    <div class="header-right">
+      @if (apiOnline() === true) {
+        <div class="status"><i class="dot" aria-hidden="true"></i> Model Aktif</div>
+      } @else if (apiOnline() === false) {
+        <div class="status"><i class="dot offline" aria-hidden="true"></i> API Tidak Terhubung</div>
+      } @else {
+        <div class="status"><i class="dot" aria-hidden="true"></i> Menghubungkan...</div>
+      }
+      <div class="status version">v1.0 · Random Forest</div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="hero-copy panel">
+      <h2>Deteksi risiko churn sebelum pelanggan benar-benar pergi.</h2>
+      <p>Masukkan data aktivitas, kepuasan, dan riwayat pesanan pelanggan untuk melihat seberapa besar peluang mereka berhenti berlangganan, faktor apa yang berpengaruh, dan langkah retensi yang bisa diambil.</p>
+      <ul class="features">
+        <li>Prediksi instan</li>
+        <li>Indikator dari data pelanggan</li>
+        <li>Saran tindakan retensi</li>
+      </ul>
+    </div>
+    <div class="hero-metric panel">
+      <div class="metric-label">Performa Model (F1-Score)</div>
+      <div class="metric-value display">{{ modelInfo() ? (modelInfo()!.f1 * 100).toFixed(1) + '%' : '–' }}</div>
+      <div class="metric-sub">Diukur pada data uji (test set)</div>
+      <dl class="metric-rows">
+        <div><dt>Accuracy</dt><dd>{{ modelInfo() ? (modelInfo()!.accuracy * 100).toFixed(1) + '%' : '–' }}</dd></div>
+        <div><dt>Precision</dt><dd>{{ modelInfo() ? (modelInfo()!.precision * 100).toFixed(1) + '%' : '–' }}</dd></div>
+        <div><dt>Recall</dt><dd>{{ modelInfo() ? (modelInfo()!.recall * 100).toFixed(1) + '%' : '–' }}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="layout">
+    <form class="card panel" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="card-head">
+        <h3 class="card-title">Data Pelanggan</h3>
+        <p class="card-desc">Detail yang dipakai model untuk menilai pelanggan ini.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="tenure">Lama Berlangganan <span class="unit">bulan</span></label>
+          <input id="tenure" type="number" min="0" step="1" formControlName="Tenure" />
+        </div>
+
+        <div class="field">
+          <label for="loginDevice">Perangkat Login</label>
+          <select id="loginDevice" formControlName="PreferredLoginDevice">
+            @for (opt of loginDevices; track opt) { <option [value]="opt">{{ opt }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="cityTier">City Tier</label>
+          <select id="cityTier" formControlName="CityTier">
+            <option [ngValue]="1">Tier 1</option>
+            <option [ngValue]="2">Tier 2</option>
+            <option [ngValue]="3">Tier 3</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="warehouseToHome">Jarak Gudang ke Rumah <span class="unit">km</span></label>
+          <input id="warehouseToHome" type="number" min="0" step="1" formControlName="WarehouseToHome" />
+        </div>
+
+        <div class="field">
+          <label for="paymentMode">Metode Pembayaran</label>
+          <select id="paymentMode" formControlName="PreferredPaymentMode">
+            @for (opt of paymentModes; track opt) { <option [value]="opt">{{ opt }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="gender">Jenis Kelamin</label>
+          <select id="gender" formControlName="Gender">
+            @for (opt of genders; track opt) { <option [value]="opt">{{ opt }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="hourSpendOnApp">Waktu di Aplikasi <span class="unit">jam/hari</span></label>
+          <input id="hourSpendOnApp" type="number" min="0" step="0.5" formControlName="HourSpendOnApp" />
+        </div>
+
+        <div class="field">
+          <label for="deviceCount">Jumlah Device Terdaftar</label>
+          <input id="deviceCount" type="number" min="0" step="1" formControlName="NumberOfDeviceRegistered" />
+        </div>
+
+        <div class="field">
+          <label for="orderCat">Kategori Pesanan Favorit</label>
+          <select id="orderCat" formControlName="PreferedOrderCat">
+            @for (opt of orderCats; track opt) { <option [value]="opt">{{ opt }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="satisfaction">Skor Kepuasan <span class="unit">1-5</span></label>
+          <input id="satisfaction" type="number" min="1" max="5" step="1" formControlName="SatisfactionScore" />
+        </div>
+
+        <div class="field">
+          <label for="maritalStatus">Status Pernikahan</label>
+          <select id="maritalStatus" formControlName="MaritalStatus">
+            @for (opt of maritalStatuses; track opt) { <option [value]="opt">{{ opt }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="addressCount">Jumlah Alamat Tersimpan</label>
+          <input id="addressCount" type="number" min="0" step="1" formControlName="NumberOfAddress" />
+        </div>
+
+        <div class="field">
+          <label for="complain">Pernah Mengajukan Komplain?</label>
+          <select id="complain" formControlName="Complain">
+            <option [ngValue]="0">Tidak</option>
+            <option [ngValue]="1">Ya</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="orderHike">Kenaikan Nilai Pesanan <span class="unit">% dari tahun lalu</span></label>
+          <input id="orderHike" type="number" min="0" step="1" formControlName="OrderAmountHikeFromlastYear" />
+        </div>
+
+        <div class="field">
+          <label for="couponUsed">Kupon Dipakai</label>
+          <input id="couponUsed" type="number" min="0" step="1" formControlName="CouponUsed" />
+        </div>
+
+        <div class="field">
+          <label for="orderCount">Jumlah Pesanan</label>
+          <input id="orderCount" type="number" min="0" step="1" formControlName="OrderCount" />
+        </div>
+
+        <div class="field">
+          <label for="daySinceLastOrder">Hari Sejak Pesanan Terakhir</label>
+          <input id="daySinceLastOrder" type="number" min="0" step="1" formControlName="DaySinceLastOrder" />
+        </div>
+
+        <div class="field">
+          <label for="cashback">Cashback Diterima <span class="unit">Rp ribuan</span></label>
+          <input id="cashback" type="number" min="0" step="1" formControlName="CashbackAmount" />
+        </div>
+      </div>
+
+      <div class="error" role="alert">{{ errorMessage() }}</div>
+
+      <div class="actions">
+        <button type="submit" class="primary" [disabled]="loading()">
+          {{ loading() ? 'Memprediksi...' : 'Cek Risiko Churn' }}
+        </button>
+        <button type="button" class="secondary" (click)="onReset()">Reset ke Default</button>
+      </div>
+    </form>
+
+    <section class="card panel result" [attr.data-tone]="tone()" aria-labelledby="result-title">
+      <div class="card-head">
+        <h3 class="card-title" id="result-title">Hasil Prediksi</h3>
+        <p class="card-desc">Probabilitas churn dan indikator yang mempengaruhinya.</p>
+      </div>
+
+      <div class="risk-wrap">
+        <div class="gauge" [style.--deg]="gaugeDeg()" role="img">
+          <div class="gauge-inner">
+            <div class="score display">{{ result() ? percentage() + '%' : '–' }}</div>
+            <div class="score-label">probabilitas churn</div>
+            <div class="risk-badge">{{ riskLabel() }}</div>
+          </div>
+        </div>
+      </div>
+
+      @if (result()) {
+        <div class="factors-head"><span>Indikator</span><span>Pengaruh · panjang bar = kekuatan</span></div>
+        <ul class="explanation">
+          @for (item of indicators(); track item.label) {
+            <li class="factor" [class]="item.cls">
+              <div class="factor-top"><span>{{ item.label }}</span><span class="tag">{{ item.tag }}</span></div>
+              <div class="bar" aria-hidden="true"><i [style.width.%]="item.weight"></i></div>
+            </li>
+          }
+        </ul>
+        <div class="insight" [innerHTML]="insight()"></div>
+      } @else {
+        <p class="empty-state">Isi form di sebelah kiri lalu klik "Cek Risiko Churn" untuk melihat hasilnya.</p>
+      }
+    </section>
+  </section>
+
+  <div class="stats-head"><h3>Performa Model</h3><span>Diukur pada data uji (test set)</span></div>
+  <section class="dashboard">
+    <div class="mini"><div class="k">Accuracy</div><div class="v">{{ modelInfo() ? (modelInfo()!.accuracy * 100).toFixed(1) + '%' : '–' }}</div></div>
+    <div class="mini"><div class="k">Precision</div><div class="v">{{ modelInfo() ? (modelInfo()!.precision * 100).toFixed(1) + '%' : '–' }}</div></div>
+    <div class="mini"><div class="k">Recall</div><div class="v">{{ modelInfo() ? (modelInfo()!.recall * 100).toFixed(1) + '%' : '–' }}</div></div>
+    <div class="mini"><div class="k">F1-Score</div><div class="v">{{ modelInfo() ? (modelInfo()!.f1 * 100).toFixed(1) + '%' : '–' }}</div></div>
+    <div class="mini"><div class="k">ROC-AUC</div><div class="v">{{ modelInfo() ? (modelInfo()!.roc_auc * 100).toFixed(1) + '%' : '–' }}</div></div>
+  </section>
+  <p class="footer">Prediksi dihasilkan oleh model Random Forest yang dilatih lewat pipeline DVC, disajikan lewat API FastAPI di <code>http://localhost:8000</code>.</p>
+</main>
+
+<div class="toast" [class.show]="showToast()" role="status">Prediksi diperbarui</div>
